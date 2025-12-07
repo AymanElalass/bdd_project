@@ -1,10 +1,40 @@
 import sqlite3
 import pandas as pd
 import os
+import sys
 
 # database file names
 db_name = "project_database.db"
 sql_script = "script.sql"
+
+# list of required files and their sources (for the user)
+required_files = {
+    "airlines.csv": "https://www.kaggle.com/datasets/usdot/flight-delays",
+    "airports.csv": "https://www.kaggle.com/datasets/usdot/flight-delays",
+    "flights.csv": "https://www.kaggle.com/datasets/usdot/flight-delays",
+    "wind_speed.csv": "https://www.kaggle.com/datasets/selfishgene/historical-hourly-weather-data",
+    "temperature.csv": "https://www.kaggle.com/datasets/selfishgene/historical-hourly-weather-data"
+}
+
+def check_files():
+    """
+    verifies that the necessary csv files are present in the directory.
+    since we don't upload them to github (too large), we must warn the user.
+    """
+    print("checking data files...")
+    missing_files = []
+    for file in required_files:
+        if not os.path.exists(file):
+            missing_files.append(file)
+    
+    if missing_files:
+        print("\nerror: missing csv files!")
+        print("please download the following files and place them in the root folder:")
+        for f in missing_files:
+            print(f"- {f} (source: {required_files[f]})")
+        print("\nexiting program.")
+        sys.exit(1)
+    print("all csv files found. starting process...\n")
 
 def create_database():
     # create tables using the sql script
@@ -143,7 +173,8 @@ def process_weather_data():
         df_weather = df_weather.drop_duplicates(subset=['datetime', 'City'])
 
         # filtering outliers (sensor errors)
-        # keeping realistic temperatures between -60 and 60 celsius
+        # findings from our data exploration notebook: some sensors report extreme values
+        # we keep realistic temperatures between -60 and 60 celsius
         df_weather = df_weather[
             (df_weather['temperature'] > -60) & 
             (df_weather['temperature'] < 60)
@@ -183,9 +214,17 @@ def main1():
 
     
 if __name__ == "__main__":
+<<<<<<< HEAD
 
     create_database()
     populate_flights_and_others()
     process_weather_data()
     print("done. database is ready")
     main1()
+=======
+    check_files()               # 1. Check if CSVs exist
+    create_database()           # 2. Create tables
+    populate_flights_and_others() # 3. Fill basic data
+    process_weather_data()      # 4. Process and fill weather
+    print("done. database is ready")
+>>>>>>> bdaa0e5c21002760a87a30eb1ac0f53251765937
