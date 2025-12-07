@@ -6,6 +6,7 @@ CREATE TABLE AIRLINES (
 
 CREATE TABLE AIRPORTS (
     iata_code CHAR(3) PRIMARY KEY,
+    airport_name VARCHAR(100) NOT NULL,
     city VARCHAR(50),
     state CHAR(2),
     latitude FLOAT,
@@ -18,12 +19,13 @@ CREATE TABLE FLIGHTS (
     flight_id INTEGER PRIMARY KEY,
     flight_date DATE,
     flight_number VARCHAR(10),
-    dep_time TIMESTAMP,
+    dep_time TEXT,
     dep_delay INTEGER,
     cancelled BOOLEAN,
     airline_code CHAR(2),
     origin_airport CHAR(3),
     dest_airport CHAR(3),
+    CHECK(dep_time GLOB '[0-2][0-9]:[0-5][0-9]:[0-5][0-9]')
     FOREIGN KEY (airline_code) 
         REFERENCES AIRLINES(airline_code),
     FOREIGN KEY (origin_airport) 

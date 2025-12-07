@@ -32,7 +32,7 @@ def populate_flights_and_others():
     # load airlines
     print("loading airlines...")
     try:
-        df_airlines = pd.read_csv("airlines.csv")
+        df_airlines = pd.read_csv("data/airlines.csv")
         # only keeping columns relevant to our schema to save memory
         df_airlines = df_airlines[['IATA_CODE', 'AIRLINE']]
         df_airlines.columns = ['airline_code', 'airline_name']
@@ -43,7 +43,7 @@ def populate_flights_and_others():
     # load airports
     print("loading airports...")
     try:
-        df_airports = pd.read_csv("airports.csv")
+        df_airports = pd.read_csv("data/airports.csv")
         df_airports = df_airports[['IATA_CODE', 'CITY', 'STATE', 'LATITUDE', 'LONGITUDE']]
         df_airports.columns = ['iata_code', 'city', 'state', 'latitude', 'longitude']
         df_airports.to_sql('AIRPORTS', conn, if_exists='append', index=False)
@@ -55,7 +55,7 @@ def populate_flights_and_others():
     # the full dataset is huge and this is enough for the project
     print("loading flights (chunk of 100k)...")
     try:
-        df_flights = pd.read_csv("flights.csv", low_memory=False, nrows=100000)
+        df_flights = pd.read_csv("data/flights.csv", low_memory=False, nrows=100000)
         
         # function to fix time format
         # the csv has weird formats like '2400' which is not valid in sql
@@ -69,8 +69,8 @@ def populate_flights_and_others():
         # merging year/month/day columns into a single datetime object
         df_flights['flight_date'] = pd.to_datetime(df_flights[['YEAR', 'MONTH', 'DAY']])
         df_flights['dep_time_str'] = df_flights['DEPARTURE_TIME'].apply(format_time)
-        df_flights['dep_time'] = pd.to_datetime(
-            df_flights['flight_date'].astype(str) + ' ' + df_flights['dep_time_str'], 
+        df_flights['dep_time'] = pd.to_datetime( 
+            df_flights['dep_time_str'], 
             errors='coerce'
         )
 
@@ -106,8 +106,8 @@ def process_weather_data():
     conn = sqlite3.connect(db_name)
     
     try:
-        df_wind = pd.read_csv("wind_speed.csv")
-        df_temp = pd.read_csv("temperature.csv")
+        df_wind = pd.read_csv("data/wind_speed.csv")
+        df_temp = pd.read_csv("data/temperature.csv")
         
         # dictionary to map city names to iata codes
         # weather data uses city names but our db is built on airport codes
@@ -173,8 +173,19 @@ def process_weather_data():
     conn.commit()
     conn.close()
 
+def main1():
+    db = sqlite3.connect('project_database.db')
+    cursor = db.cursor()
+    query = ("SELECT dep_delay FROM flights")
+    print(pd.read_sql_query(query, db))
+
+
+
+    
 if __name__ == "__main__":
+
     create_database()
     populate_flights_and_others()
     process_weather_data()
     print("done. database is ready")
+    main1()
