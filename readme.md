@@ -45,6 +45,10 @@ python main.py
 * **`query.pdf`**
 * **`dataprocessing.pdf`**
 
+## Report location
+
+* **`report/report.pdf`**
+
 ## Project Structure
 
   * **`main.py`** : Main script that creates the database, cleans data, and populates tables.
